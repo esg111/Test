@@ -1,5 +1,5 @@
 fun main() {
-    val (n, m) = readLine()!!.split(' ').map { it.toInt() }
+    val (n, m) = readln().split(' ').map { it.toInt() }
     val node = IntArray(n + 1) { it }
 
     fun find(b:Int): Int{
@@ -13,7 +13,7 @@ fun main() {
     }
 
     repeat(m) {
-        val (a, b, c) = readLine()!!.split(' ').map { it.toInt() }
+        val (a, b, c) = readln().split(' ').map { it.toInt() }
         when(a) {
             0 -> union(b, c)
             1 -> println(if (find(b) == find(c)) "YES" else "NO")
