@@ -14,25 +14,44 @@ library(jsonlite)
 library(tidyverse)
 library(dplyr)
 
-##기본 API 정보
-key="발급받은 API키"
+##발급받은 API키 정보
+key="발급받은 API 키"
 
-#최종적으로 표가 담길 변수
+#최종적으로 표가 담길 데이터프레임
 result_df<-data.frame()
 result_df=rbind(result_df,c("","","",""))
 names(result_df)=c('게시일자', '공고명', '수요기관', '공고URL')
 
-#1부터 200페이지 까지 데이터 프레임에 담는 반복문
-for(i in 1:200){
-  getPage_df("정보화",i)
-}
-
-getPage_df<-function(keyword, page){
+#페이지 데이터를 가져오는 함수정의
+#입력 범위값 초과 에러로 인해 22년, 23년(전날까지)로 분할
+getPage_df_22<-function(keyword, page){
   bidNtceNm<-URLencode(keyword)
   url <- paste0("https://apis.data.go.kr/1230000/BidPublicInfoService03/getBidPblancListInfoThngPPSSrch?serviceKey=", 
                 key, 
                 "&numOfRows=10&pageNo=", page,
                 "&inqryDiv=1&inqryBgnDt=202201010000&inqryEndDt=202212312359&bidNtceNm=",
+                bidNtceNm,
+                "&bidClseExcpYn=N&intrntnlDivCd=1&type=json")
+  
+  res<-GET(url=url)
+  res %>%
+    content(as='text', encoding='UTF-8') %>% 
+    fromJSON()->title
+  
+  df<-as.data.frame(lapply(title, function(title) if(is.character(title)|is.factor(title)) gsub(',', '', title) else(title)))
+  df<-df[,c("response.body.items.bidNtceDt", "response.body.items.bidNtceNm", "response.body.items.ntceInsttNm", "response.body.items.bidNtceDtlUrl")]
+  colnames(df)<-c('게시일자', '공고명', '수요기관', '공고URL')
+  
+  result_df<<-rbind(result_df,df)
+}
+getPage_df_23<-function(keyword, page){
+  bidNtceNm<-URLencode(keyword)
+  url <- paste0("https://apis.data.go.kr/1230000/BidPublicInfoService03/getBidPblancListInfoThngPPSSrch?serviceKey=", 
+                key, 
+                "&numOfRows=10&pageNo=", page,
+                "&inqryDiv=1&inqryBgnDt=202201010000&inqryEndDt=",
+                as.numeric(gsub("-", "", Sys.Date()))-1,
+                "2359&bidNtceNm=",
                 bidNtceNm,
                 "&bidClseExcpYn=N&intrntnlDivCd=1&type=json")
   
@@ -45,7 +64,20 @@ getPage_df<-function(keyword, page){
   df<-as.data.frame(lapply(title, function(title) if(is.character(title)|is.factor(title)) gsub(',', '', title) else(title)))
   df<-df[,c("response.body.items.bidNtceDt", "response.body.items.bidNtceNm", "response.body.items.ntceInsttNm", "response.body.items.bidNtceDtlUrl")]
   colnames(df)<-c('게시일자', '공고명', '수요기관', '공고URL')
-  rm(title)
   
-  result_df=rbind(result_df,df)
+  result_df<<-rbind(result_df,df)
 }
+
+#설정된 범위 페이지 까지 데이터 프레임에 담는 반복문
+#에러문구 출력시 콘솔에 esc로 넘어가기
+for (i in 101:200) {
+  tryCatch({
+    getPage_df_22("시스템", i)
+    }, error = function(err) {
+      print(paste(i,": ",err))
+      })
+}
+
+result_df <- result_df[ -c(452:471),]
+#완성된 데이터프레임 엑셀 추출
+write.xlsx(result_df, "시스템키워드공고.xlsx")
