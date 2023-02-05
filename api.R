@@ -70,12 +70,13 @@ getPage_df_23<-function(keyword, page){
 
 #설정된 범위 페이지 까지 데이터 프레임에 담는 반복문
 #에러문구 출력시 콘솔에 esc로 넘어가기
-for (i in 101:200) {
+for (i in 401:501) {
   tryCatch({
     getPage_df_22("시스템", i)
     }, error = function(err) {
       print(paste(i,": ",err))
       })
+  print(paste(i,": 진행 완료"))
 }
 
 result_df <- result_df[ -c(452:471),]
