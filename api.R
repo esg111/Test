@@ -5,7 +5,10 @@ install.packages('dplyr')
 install.packages("magrittr")
 install.packages("rjson")
 install.packages("openxlsx")
-
+install.packages("stringi")
+install.packages("data.table")
+library(data.table)
+library(stringi)
 library("openxlsx")
 library(rjson)
 library(magrittr)
@@ -15,7 +18,7 @@ library(tidyverse)
 library(dplyr)
 
 ##발급받은 API키 정보
-key="발급받은 API 키"
+key="YMhRuZpdz1p%2BjjXuLHXku6G4t%2FER7IlAe4bCq5Nag59ps5ldLNH0Q9FA4ndgk9PIJtgZqDEIL6bQJmCT30g0Qg%3D%3D"
 
 #최종적으로 표가 담길 데이터프레임
 result_df<-data.frame()
@@ -38,18 +41,18 @@ getPage_df_22<-function(keyword, page){
     content(as='text', encoding='UTF-8') %>% 
     fromJSON()->title
   
-  df<-as.data.frame(lapply(title, function(title) if(is.character(title)|is.factor(title)) gsub(',', '', title) else(title)))
+  df<-as.data.frame(lapply(title, function(title) if(is.character(title)|is.factor(title))stri_replace_all_regex(title, ",", "") else(title)))
   df<-df[,c("response.body.items.bidNtceDt", "response.body.items.bidNtceNm", "response.body.items.ntceInsttNm", "response.body.items.bidNtceDtlUrl")]
   colnames(df)<-c('게시일자', '공고명', '수요기관', '공고URL')
   
-  result_df<<-rbind(result_df,df)
+  result_df<<-rbindlist(list(result_df, df), use.names = TRUE)
 }
 getPage_df_23<-function(keyword, page){
   bidNtceNm<-URLencode(keyword)
   url <- paste0("https://apis.data.go.kr/1230000/BidPublicInfoService03/getBidPblancListInfoThngPPSSrch?serviceKey=", 
                 key, 
                 "&numOfRows=10&pageNo=", page,
-                "&inqryDiv=1&inqryBgnDt=202201010000&inqryEndDt=",
+                "&inqryDiv=1&inqryBgnDt=202301010000&inqryEndDt=",
                 as.numeric(gsub("-", "", Sys.Date()))-1,
                 "2359&bidNtceNm=",
                 bidNtceNm,
@@ -61,16 +64,16 @@ getPage_df_23<-function(keyword, page){
     content(as='text', encoding='UTF-8') %>% 
     fromJSON()->title
   
-  df<-as.data.frame(lapply(title, function(title) if(is.character(title)|is.factor(title)) gsub(',', '', title) else(title)))
+  df<-as.data.frame(lapply(title, function(title) if(is.character(title)|is.factor(title))stri_replace_all_regex(title, ",", "") else(title)))
   df<-df[,c("response.body.items.bidNtceDt", "response.body.items.bidNtceNm", "response.body.items.ntceInsttNm", "response.body.items.bidNtceDtlUrl")]
   colnames(df)<-c('게시일자', '공고명', '수요기관', '공고URL')
   
-  result_df<<-rbind(result_df,df)
+  result_df<<-rbindlist(list(result_df, df), use.names = TRUE)
 }
 
 #설정된 범위 페이지 까지 데이터 프레임에 담는 반복문
 #에러문구 출력시 콘솔에 esc로 넘어가기
-for (i in 401:501) {
+for (i in 501:600) {
   tryCatch({
     getPage_df_22("시스템", i)
     }, error = function(err) {
