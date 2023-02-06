@@ -14,6 +14,7 @@ library(tidyverse)
 library(dplyr)
 
 ##발급받은 API키 정보
+##https://www.data.go.kr/data/15000802/openapi.do
 key="여기에 발급받은 API키 넣으세요"
 
 #최종적으로 표가 담길 데이터프레임
