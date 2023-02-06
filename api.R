@@ -18,7 +18,7 @@ library(tidyverse)
 library(dplyr)
 
 ##발급받은 API키 정보
-key="YMhRuZpdz1p%2BjjXuLHXku6G4t%2FER7IlAe4bCq5Nag59ps5ldLNH0Q9FA4ndgk9PIJtgZqDEIL6bQJmCT30g0Qg%3D%3D"
+key="발급받은 API 키"
 
 #최종적으로 표가 담길 데이터프레임
 result_df<-data.frame()
@@ -73,15 +73,15 @@ getPage_df_23<-function(keyword, page){
 
 #설정된 범위 페이지 까지 데이터 프레임에 담는 반복문
 #에러문구 출력시 콘솔에 esc로 넘어가기
-for (i in 501:600) {
+for (i in 1:100) {
   tryCatch({
-    getPage_df_22("시스템", i)
-    }, error = function(err) {
-      print(paste(i,": ",err))
-      })
+    getPage_df_22("AI", i)
+  }, error = function(err) {
+    print(paste(i,": ",err))
+  })
   print(paste(i,": 진행 완료"))
 }
 
-result_df <- result_df[ -c(452:471),]
+#setDTthreads(8)
 #완성된 데이터프레임 엑셀 추출
-write.xlsx(result_df, "시스템키워드공고.xlsx")
+write.xlsx(result_df, "AI키워드공고22.xlsx")
