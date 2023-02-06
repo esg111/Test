@@ -3,14 +3,10 @@ install.packages('jsonlite') #json 형식의 데이터 전처리를 위한 패�
 install.packages('tidyverse')
 install.packages('dplyr')
 install.packages("magrittr")
-install.packages("rjson")
-install.packages("openxlsx")
-install.packages("stringi")
 install.packages("data.table")
+
 library(data.table)
-library(stringi)
 library("openxlsx")
-library(rjson)
 library(magrittr)
 library(httr)
 library(jsonlite)
@@ -18,7 +14,7 @@ library(tidyverse)
 library(dplyr)
 
 ##발급받은 API키 정보
-key="발급받은 API 키"
+key="여기에 발급받은 API키 넣으세요"
 
 #최종적으로 표가 담길 데이터프레임
 result_df<-data.frame()
@@ -75,7 +71,7 @@ getPage_df_23<-function(keyword, page){
 #에러문구 출력시 콘솔에 esc로 넘어가기
 for (i in 1:100) {
   tryCatch({
-    getPage_df_22("AI", i)
+    getPage_df_22("인공지능", i)
   }, error = function(err) {
     print(paste(i,": ",err))
   })
@@ -83,5 +79,6 @@ for (i in 1:100) {
 }
 
 #setDTthreads(8)
+
 #완성된 데이터프레임 엑셀 추출
-write.xlsx(result_df, "AI키워드공고22.xlsx")
+write.xlsx(result_df, "인공지능키워드공고22.xlsx")
